@@ -58,6 +58,16 @@ end
 
 end
 
+%remove "self-connections"
+for b=1:numel(S3)
+k=N2-1;
+p=N2;
+for n=1:N2
+  S3(b).data(:,n*k+p)=[];
+  k=k-1;
+  p=p-1;
+end
+end
 
 
 %compute the group-average, brain-wide average trend in functional
@@ -69,16 +79,16 @@ for b=1:numel(S) %for each subject:
     r=r+1
     j=1;
 
-    for i=1:N2^2
+    for i=1:N2^2-N2
     c=1;
 
        while j<length(S3(b).data(:,1))-60     %for 60TR chunks
        %while j<length(S3(b).data(:,1))-30    %for 30TR chunks
        %while j<length(S3(b).data(:,1))-15    %for 15TR chunks
 
-       every60TRs(i,c,r)=mean(S3(b).data(j:j+59,i));     %average connectivity values over 60TR chunks
-       %every30TRs(i,c,r)=mean(S3(b).data(j:j+29,i));    %average connectivity values over 30TR chunks
-       %every15TRs(i,c,r)=mean(S3(b).data(j:j+14,i));    %average connectivity values over 15TR chunks
+       every60TRs(i,c,r)=mean(unique(S3(b).data(j:j+59,i)));   %average connectivity value across all unique ROI-ROI connections during 60TR chunks
+       %every30TRs(i,c,r)=mean(unique(S3(b).data(j:j+29,i)));    %average connectivity value across all unique ROI-ROI connections during 30TR chunks
+       %every15TRs(i,c,r)=mean(unique(S3(b).data(j:j+14,i)));    %average connectivity value across all unique ROI-ROI connections during 15TR chunks
 
        j=j+60;  %for 60TR chunks 
        %j=j+30; %for 30TR chunks
@@ -94,9 +104,9 @@ GroupAvg_every60TRs=mean(every60TRs,3); %for 60TR chunks
 %GroupAvg_every30TRs=mean(every30TRs,3); %for 30TR chunks
 %GroupAvg_every15TRs=mean(every15TRs,3); %for 15TR chunks
 
-GroupAvg_BrainwideAvg_FC_overTime = mean(GroupAvg_every60TRs); %group-average, brain-wide average trend in FC strength over time
+GroupAvg_BrainwideAvg_FC_overTime_60TRs = mean(GroupAvg_every60TRs); %group-average, brain-wide average trend in FC strength over time
 
-plot(GroupAvg_BrainwideAvg_FC_overTime) %visualize the group-level trend in brain-wide FC strength over time
+plot(GroupAvg_BrainwideAvg_FC_overTime_60TRs) %visualize the group-level trend in brain-wide FC strength over time
 
 
 %compute subject-level trends in brainwide FC change over time
@@ -104,4 +114,5 @@ plot(GroupAvg_BrainwideAvg_FC_overTime) %visualize the group-level trend in brai
 for i=1:numel(S)
     Subject_BrainwideAvg_FC_overTime_60TRchunks(i,:)=mean(every60TRs(:,:,i),1);
 end
+
 
